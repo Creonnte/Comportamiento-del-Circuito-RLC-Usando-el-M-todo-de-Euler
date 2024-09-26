@@ -1,0 +1,95 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def rlc_serie_euler(R, L, C, Vi, dt, t_sim):
+  """
+  Simula un circuito RLC en serie usando el método de Euler.
+
+  Args:
+    R: Resistencia (ohmios).
+    L: Inductancia (henrios).
+    C: Capacitancia (faradios).
+    Vi: Voltaje de entrada (volts).
+    dt: Paso de tiempo (segundos).
+    t_sim: Tiempo de simulación (segundos).
+
+  Returns:
+    t: Vector de tiempo.
+    Vc: Vector de voltaje en el capacitor.
+  """
+
+  t = np.arange(0, t_sim, dt)
+  Vc = np.zeros(len(t))
+  Il = 0
+
+  for i in range(1, len(t)):
+    dVc = (Il - Vc[i-1]/R)/C
+    dIl = (Vi - Vc[i-1] - R*Il)/L
+    Vc[i] = Vc[i-1] + dt*dVc
+    Il = Il + dt*dIl
+
+  return t, Vc
+
+def rlc_paralelo_euler(R, L, C, Ii, dt, t_sim):
+  """
+  Simula un circuito RLC en paralelo usando el método de Euler.
+
+  Args:
+    R: Resistencia (ohmios).
+    L: Inductancia (henrios).
+    C: Capacitancia (faradios).
+    Ii: Corriente de entrada (amperes).
+    dt: Paso de tiempo (segundos).
+    t_sim: Tiempo de simulación (segundos).
+
+  Returns:
+    t: Vector de tiempo.
+    Vl: Vector de voltaje en el inductor.
+  """
+
+  t = np.arange(0, t_sim, dt)
+  Vl = np.zeros(len(t))
+  Ic = 0
+
+  for i in range(1, len(t)):
+    dVl = (Ii - Vl[i-1]/R - Ic)/C
+    dIc = Vl[i-1]/L
+    Vl[i] = Vl[i-1] + dt*dVl
+    Ic = Ic + dt*dIc
+
+  return t, Vl
+
+# Parámetros del circuito
+R = 100
+L = 0.1
+C = 0.001
+
+# Parámetros de simulación
+Vi = 100
+Ii = 1
+dt = 0.0001
+t_sim = 0.1
+
+# Simulación del circuito en serie
+t_serie, Vc_serie = rlc_serie_euler(R, L, C, Vi, dt, t_sim)
+
+# Simulación del circuito en paralelo
+t_paralelo, Vl_paralelo = rlc_paralelo_euler(R, L, C, Ii, dt, t_sim)
+
+# Gráficas
+plt.figure(figsize=(12, 6))
+
+plt.subplot(2, 1, 1)
+plt.plot(t_serie, Vc_serie)
+plt.title('Circuito RLC Serie')
+plt.xlabel('Tiempo (s)')
+plt.ylabel('Voltaje en el Capacitor (V)')
+
+plt.subplot(2, 1, 2)
+plt.plot(t_paralelo, Vl_paralelo)
+plt.title('Circuito RLC Paralelo')
+plt.xlabel('Tiempo (s)')
+plt.ylabel('Voltaje en el Inductor (V)')
+
+plt.tight_layout()
+plt.show()
